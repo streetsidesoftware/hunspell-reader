@@ -152,9 +152,6 @@ export class Aff {
      * @internal
      */
     applyRulesToWord(affWord: AffWord, remainingDepth: number): AffWord[] {
-        if (remainingDepth <= 0) {
-            return [];
-        }
         const { word, base, suffix, prefix, dic } = affWord;
         const allRules = this.getMatchingRules(affWord.rules);
         const { rulesApplied, flags } = allRules
@@ -168,7 +165,7 @@ export class Aff {
         const wordWithFlags = {word, flags, rulesApplied, rules: '', base, suffix, prefix, dic};
         return [
             wordWithFlags,
-            ...this.applyAffixesToWord(affixRules, { ...wordWithFlags, rules }, remainingDepth - 1)
+            ...this.applyAffixesToWord(affixRules, { ...wordWithFlags, rules }, remainingDepth)
         ]
         .filter(({flags}) => !flags.isNeedAffix)
         .map(affWord => logAffWord(affWord, 'applyRulesToWord'))
@@ -187,7 +184,7 @@ export class Aff {
         const r = affixRules
             .map(affix => this.applyAffixToWord(affix, affWord, combinableSfx))
             .reduce((a, b) => a.concat(b), [])
-            .map(affWord => this.applyRulesToWord(affWord, remainingDepth))
+            .map(affWord => this.applyRulesToWord(affWord, remainingDepth - 1))
             .reduce((a, b) => a.concat(b), [])
             ;
         return r;

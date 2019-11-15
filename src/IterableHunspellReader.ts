@@ -26,6 +26,10 @@ export class IterableHunspellReader implements Iterable<string> {
         return this.src.dic;
     }
 
+    set maxDepth(value: number) {
+        this.aff.maxSuffixDepth = value;
+    }
+
     /**
      * @internal
      */

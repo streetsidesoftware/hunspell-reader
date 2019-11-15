@@ -123,33 +123,52 @@ describe('Test Aff', () => {
 
 });
 
-describe('Validated loading all dictionaries in the `dictionaries` directory.', async () => {
-    const dictionaries = (await fs.readdir(DICTIONARY_LOCATIONS))
+describe('Validated loading all dictionaries in the `dictionaries` directory.', () => {
+    async function getDictionaries() {
+        return (await fs.readdir(DICTIONARY_LOCATIONS))
         .filter(dic => !!dic.match(/\.aff$/))
         .map(base => path.join(DICTIONARY_LOCATIONS, base));
-    it('Make sure we found some sample dictionaries', () => {
+    }
+    const pDictionaries = getDictionaries();
+    it('Make sure we found some sample dictionaries', async () => {
+        const dictionaries = await pDictionaries;
         expect(dictionaries.length).to.be.greaterThan(4);
     });
 
-    dictionaries.forEach(dicAff => {
-        // const dicDic = dicAff.replace(/\.aff$/, '.dic');
-        // const dicContent = fs.readFile(dicDic)
-        it(`Ensure we can load ${path.basename(dicAff)}`, async () => {
-            const aff = await AffReader.parseAffFile(dicAff);
-            expect(aff.PFX).to.be.instanceof(Map);
-            expect(aff.SFX).to.be.instanceof(Map);
+    it('Loads all dictionaries', async () => {
+        const dictionaries = await pDictionaries;
+
+        dictionaries.forEach(dicAff => {
+            // const dicDic = dicAff.replace(/\.aff$/, '.dic');
+            // const dicContent = fs.readFile(dicDic)
+            it(`Ensure we can load ${path.basename(dicAff)}`, async () => {
+                const aff = await AffReader.parseAffFile(dicAff);
+                expect(aff.PFX).to.be.instanceof(Map);
+                expect(aff.SFX).to.be.instanceof(Map);
+            });
         });
     });
 });
 
-describe('Validate loading Hungarian', async () => {
-    it('tests applying rules for hu', async () => {
-        const aff = await parseAffFileToAff(huAff);
-        aff.maxSuffixDepth = 2;
+describe('Validate loading Hungarian', () => {
+    const affP = parseAffFileToAff(huAff);
+
+    it('tests applying rules for hu Depth 0', async () => {
+        const aff = await affP;
+        aff.maxSuffixDepth = 0;
         const r =  aff.applyRulesToDicEntry('kemping/17');
         const w = r.map(affWord => affWord.word);
         expect(w).to.contain('kemping');
-        logApplyRulesResults(r);
+        expect(w.length).to.equal(1);
+    });
+
+    it('tests applying rules for hu Depth 1', async () => {
+        const aff = await affP;
+        aff.maxSuffixDepth = 1;
+        const r =  aff.applyRulesToDicEntry('kemping/17');
+        const w = r.map(affWord => affWord.word);
+        expect(w).to.contain('kemping');
+        expect(w.length).to.be.greaterThan(1);
     });
 });
 
