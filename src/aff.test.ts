@@ -13,7 +13,7 @@ const enAff = path.join(DICTIONARY_LOCATIONS, 'en_US.aff');
 // const enGbAff = path.join(DICTIONARY_LOCATIONS, 'en_GB.aff');
 const esAff = path.join(DICTIONARY_LOCATIONS, 'es_ANY.aff');
 const frAff = path.join(DICTIONARY_LOCATIONS, 'fr-moderne.aff');
-const huAff = path.join(DICTIONARY_LOCATIONS, 'hu', 'index.aff');
+const huAff = path.join(DICTIONARY_LOCATIONS, 'hu', 'hu.aff');
 
 describe('Basic Aff Validation', () => {
     const pAff = AffReader.parseAff(getSimpleAff());
@@ -68,7 +68,7 @@ describe('Test Aff', () => {
     it('test breaking up rules for en', async () => {
         const aff = await parseAffFileToAff(enAff);
         expect(aff.separateRules('ZbCcChC1')).to.not.be.deep.equal(['Zb', 'Cc', 'Ch', 'C1']);
-        expect(aff.separateRules('ZbCcChC1')).to.be.deep.equal('ZbCcChC1'.split(''));
+        expect(aff.separateRules('ZbCcChC1')).to.be.deep.equal('ZbCch1'.split(''));
     });
 
     it('test getting rules for nl', async () => {
@@ -145,7 +145,8 @@ describe('Validated loading all dictionaries in the `dictionaries` directory.', 
 describe('Validate loading Hungarian', async () => {
     it('tests applying rules for hu', async () => {
         const aff = await parseAffFileToAff(huAff);
-        const r =  aff.applyRulesToDicEntry('kemping/16');
+        aff.maxSuffixDepth = 2;
+        const r =  aff.applyRulesToDicEntry('kemping/17');
         const w = r.map(affWord => affWord.word);
         expect(w).to.contain('kemping');
         logApplyRulesResults(r);

@@ -115,15 +115,26 @@ export interface AffWord {
     dic: string;            // dictionary entry
 }
 
+const DefaultMaxDepth = 5;
+
 export class Aff {
     protected rules: Map<string, Rule>;
     protected _oConv: Converter;
     protected _iConv: Converter;
+    private _maxSuffixDepth = DefaultMaxDepth;
 
     constructor(public affInfo: AffInfo) {
         this.rules = processRules(affInfo);
         this._iConv = new Converter(affInfo.ICONV || []);
         this._oConv = new Converter(affInfo.OCONV || []);
+    }
+
+    public get maxSuffixDepth() {
+        return this._maxSuffixDepth;
+    }
+
+    public set maxSuffixDepth(value: number) {
+        this._maxSuffixDepth = value;
     }
 
     /**
@@ -133,14 +144,17 @@ export class Aff {
     applyRulesToDicEntry(line: string): AffWord[] {
         const [lineLeft] = line.split(/\s+/, 1);
         const [word, rules = ''] = lineLeft.split('/', 2);
-        return this.applyRulesToWord(asAffWord(word, rules))
+        return this.applyRulesToWord(asAffWord(word, rules), this.maxSuffixDepth)
             .map(affWord => ({...affWord, word: this._oConv.convert(affWord.word) }));
     }
 
     /**
      * @internal
      */
-    applyRulesToWord(affWord: AffWord): AffWord[] {
+    applyRulesToWord(affWord: AffWord, remainingDepth: number): AffWord[] {
+        if (remainingDepth <= 0) {
+            return [];
+        }
         const { word, base, suffix, prefix, dic } = affWord;
         const allRules = this.getMatchingRules(affWord.rules);
         const { rulesApplied, flags } = allRules
@@ -154,14 +168,17 @@ export class Aff {
         const wordWithFlags = {word, flags, rulesApplied, rules: '', base, suffix, prefix, dic};
         return [
             wordWithFlags,
-            ...this.applyAffixesToWord(affixRules, { ...wordWithFlags, rules })
+            ...this.applyAffixesToWord(affixRules, { ...wordWithFlags, rules }, remainingDepth - 1)
         ]
         .filter(({flags}) => !flags.isNeedAffix)
         .map(affWord => logAffWord(affWord, 'applyRulesToWord'))
         ;
     }
 
-    applyAffixesToWord(affixRules: Fx[], affWord: AffWord): AffWord[] {
+    applyAffixesToWord(affixRules: Fx[], affWord: AffWord, remainingDepth: number): AffWord[] {
+        if (remainingDepth <= 0) {
+            return [];
+        }
         const combineableRules = affixRules
             .filter(rule => rule.type === 'SFX')
             .filter(rule => rule.combinable === true)
@@ -170,7 +187,7 @@ export class Aff {
         const r = affixRules
             .map(affix => this.applyAffixToWord(affix, affWord, combinableSfx))
             .reduce((a, b) => a.concat(b), [])
-            .map(affWord => this.applyRulesToWord(affWord))
+            .map(affWord => this.applyRulesToWord(affWord, remainingDepth))
             .reduce((a, b) => a.concat(b), [])
             ;
         return r;
