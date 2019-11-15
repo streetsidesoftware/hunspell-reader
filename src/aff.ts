@@ -245,11 +245,11 @@ export class Aff {
     separateRules(rules: string): string[] {
         switch (this.affInfo.FLAG) {
             case 'long':
-                return rules.replace(/(..)/g, '$1//').split('//').slice(0, -1);
+                return [...new Set(rules.replace(/(..)/g, '$1//').split('//').slice(0, -1))];
             case 'num':
-                return rules.split(',');
+                return [...new Set(rules.split(','))];
         }
-        return rules.split('');
+        return [...new Set(rules.split(''))];
     }
 
     get iConv() {
