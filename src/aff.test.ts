@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {AffWord, compareAff, asAffWord, Aff} from './aff';
+import {AffWord, compareAff, asAffWord, Aff, filterAff} from './aff';
 import {affWordToColoredString} from './aff';
 import {parseAffFileToAff} from './affReader';
 import * as AffReader from './affReader';
@@ -160,6 +160,18 @@ describe('Test Aff', () => {
         expect(compareAff(affA, affB)).to.be.equal(0);
         affB.flags.canBeCompoundBegin = true;
         expect(compareAff(affA, affB)).to.be.equal(1);
+    });
+
+    it('test filterAff', () => {
+        const fn = filterAff();
+        expect(fn(asAffWord('Hello'))).to.be.true;
+        expect(fn(asAffWord('Hello'))).to.be.false;
+        expect(fn(asAffWord('Hello', '', { canBeCompoundBegin: true }))).to.be.true;
+        expect(fn(asAffWord('Hello', '', { canBeCompoundBegin: true }))).to.be.false;
+        expect(fn(asAffWord('Hello'))).to.be.true;
+        expect(fn(asAffWord('Hello'))).to.be.false;
+        expect(fn(asAffWord('There'))).to.be.true;
+        expect(fn(asAffWord('There'))).to.be.false;
     });
 
 });

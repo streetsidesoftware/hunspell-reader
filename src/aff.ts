@@ -3,6 +3,7 @@ import {Converter} from './converter';
 import {genSequence as gs, Sequence} from 'gensequence';
 import * as GS from 'gensequence';
 import { Mapping } from './types';
+import { filterOrderedList } from './util';
 
 const log = false;
 
@@ -241,7 +242,7 @@ export class Aff {
         const [word, rules = ''] = lineLeft.split('/', 2);
         const results = this.applyRulesToWord(asAffWord(word, rules), maxSuffixDepth)
             .map(affWord => ({...affWord, word: this._oConv.convert(affWord.word) }));
-        results.sort(compareAff)
+        results.sort(compareAff);
         const filtered = results.filter(filterAff());
         return filtered;
     }
@@ -448,7 +449,7 @@ export function flagsToString(flags: AffWordFlags) {
         .join('_');
 }
 
-export function asAffWord(word: string, rules: string = ''): AffWord {
+export function asAffWord(word: string, rules: string = '', flags: AffWordFlags = {}): AffWord {
     return {
         word,
         base: word,
@@ -456,14 +457,15 @@ export function asAffWord(word: string, rules: string = ''): AffWord {
         suffix: '',
         rulesApplied: '',
         rules,
-        flags: {},
+        flags,
         dic: rules ? word + '/' + rules : word,
     };
 }
 
 export function compareAff(a: AffWord, b: AffWord) {
-    const wordDiff = a.word < b.word ? -1 : a.word > b.word ? 1 : 0;
-    if (wordDiff) return wordDiff;
+    if (a.word !== b.word) {
+        return a.word < b.word ? -1 : 1;
+    }
     const sigA = signature(a);
     const sigB = signature(b);
     return sigA < sigB ? -1 : sigA > sigB ? 1 : 0;
@@ -473,9 +475,6 @@ export function compareAff(a: AffWord, b: AffWord) {
  * Returns a filter function that will filter adjacent AffWords
  * It compares the word and the flags.
  */
-function filterAff() {
-    let last = asAffWord('');
-    return (w: AffWord) => {
-        return !!compareAff(last, w);
-    };
+export function filterAff() {
+    return filterOrderedList<AffWord>((a, b) => a.word !== b.word || signature(a) !== signature(b));
 }
