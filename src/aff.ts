@@ -195,11 +195,15 @@ export interface AffWord {
     rules: string;
     flags: AffWordFlags;
     rulesApplied: string;
+    /** prefix + base + suffix == word */
     base: string;           // the base
     suffix: string;         // suffixes applied
     prefix: string;         // prefixes applied
     dic: string;            // dictionary entry
 }
+
+/** The `word` field in a Converted AffWord has been converted using the OCONV mapping */
+export type ConvertedAffWord = AffWord;
 
 const DefaultMaxDepth = 5;
 
@@ -225,9 +229,10 @@ export class Aff {
 
     /**
      * Takes a line from a hunspell.dic file and applies the rules found in the aff file.
+     * For performance reasons, only the `word` field is mapped with OCONV.
      * @param {string} line - the line from the .dic file.
      */
-    applyRulesToDicEntry(line: string, maxDepth?: number): AffWord[] {
+    applyRulesToDicEntry(line: string, maxDepth?: number): ConvertedAffWord[] {
         const maxSuffixDepth = maxDepth ?? this.maxSuffixDepth;
         const [lineLeft] = line.split(/\s+/, 1);
         const [word, rules = ''] = lineLeft.split('/', 2);
