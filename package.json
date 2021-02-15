@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "test-unit": "mocha --recursive ./dist/*.test.js",
-    "test-spelling": "cspell 'src/**/*.ts' '*.md'",
+    "test-spelling": "cspell \"src/**/*.ts\" \"*.md\"",
     "test": "npm run test-unit && npm run test-spelling",
     "build": "tsc -p .",
     "prepare": "npm run build",
