@@ -90,6 +90,7 @@
       "ts-node/register"
     ],
     "reporter": [
+      "lcov",
       "json",
       "html"
     ]
