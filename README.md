@@ -1,6 +1,7 @@
-# hunspell-reader
+> [!WARNING]
+> This repository has been moved into the CSpell Monorepo. Link: [packages/hunspell-reader](https://github.com/streetsidesoftware/cspell/tree/main/packages/hunspell-reader#readme).
 
-[![Build Status](https://travis-ci.org/streetsidesoftware/hunspell-reader.svg?branch=master)](https://travis-ci.org/streetsidesoftware/hunspell-reader)
+# hunspell-reader
 
 A library for reading Hunspell Dictionary files
 
