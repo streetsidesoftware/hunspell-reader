@@ -38,7 +38,7 @@
   },
   "homepage": "https://github.com/Jason-Rev/hunspell-reader#readme",
   "devDependencies": {
-    "@types/fs-extra": "^9.0.8",
+    "@types/fs-extra": "^11.0.4",
     "@types/jest": "^26.0.20",
     "@types/node": "^16.0.0",
     "cspell": "^5.2.4",
@@ -50,7 +50,7 @@
   },
   "dependencies": {
     "commander": "^7.1.0",
-    "fs-extra": "^10.0.0",
+    "fs-extra": "^11.3.0",
     "gensequence": "^3.1.1",
     "iconv-lite": "^0.6.2"
   },
